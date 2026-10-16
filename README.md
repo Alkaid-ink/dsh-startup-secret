@@ -56,11 +56,41 @@ DeepSeek Harness 的启动界面与启动动画插件（二次创作版）。
 
 ## 安装
 
+**推荐用脚本安装**（脚本会自动完成下面两步，避免漏掉关键步骤）：
+
+- **Windows**：解压后**双击「安装.cmd」**
+- **macOS / Linux**：`./install.sh`（可加参数 `./install.sh desktop` 装到桌面端）
+
+### 手动安装（两步，缺一不可）
+
+DSH 加载插件依赖 `dsh.profile.bundles` 层堆栈，但 `dsh plugin add` 只是
+`pnpm add` 的转发，**只写 dependencies、不会自动把包名加入 bundles**。
+漏掉第二步，插件会"装上了但完全没效果"（不报错、无动画、设置页无入口）。
+
+**第 1 步：安装依赖**
+
 ```bash
-dsh plugin --profile web add ./dsh-startup-secret-1.2.0.tgz
+dsh plugin --profile web add ./dsh-startup-secret-1.2.2.tgz
 ```
 
-Windows 上也可以解压压缩包后**双击「安装.cmd」**，脚本会自动完成同样的操作。
+**第 2 步：把插件加入 bundles**（关键）
+
+打开 `~/.dsh/profiles/web/package.json`，在 `dsh.profile.bundles` 数组里加入
+`"dsh-startup-secret"`：
+
+```json
+"dsh": {
+  "profile": {
+    "bundles": [
+      "@deepseek-ai/dsh-base",
+      "@deepseek-ai/dsh-web-app",
+      "dsh-startup-secret"
+    ]
+  }
+}
+```
+
+（desktop profile 同理，文件在 `~/.dsh/profiles/desktop/package.json`。）
 
 **装完重启 dsh web**（关掉启动器窗口再重新双击）。重启后刷新页面就能看到启动动画，
 设置页里会多出一项「启动动画」。
@@ -111,12 +141,19 @@ dsh plugin --profile web remove dsh-startup-secret
 |---|---|---|
 | 语音播报 | 开 | 是否念台词 |
 | 语音来源 | 真声素材 | `真声素材` 用内置录音 / `系统 TTS` 用浏览器合成音 |
-| 音色 | 自动 | 只在用系统 TTS 时有效。留空 = 自动挑一个女声 |
-| 语速 | 0.88 | 只在用系统 TTS 时有效。越慢越有旁白感 |
-| 音调 | 0.85 | 只在用系统 TTS 时有效。调低更沉稳，1.0 以上会像客服播报 |
+| 音色 | 自动（优先神经网络女声）-US | 五个内置真声音色，选音色即决定语种与嗓音 |
 | 音量 | 0.9 | 台词音量 |
 | 播报前提示音 | 开 | 念台词前先响两声轻提示，更像系统播报 |
-| 开口前留白 | 240 ms | 提示音响过之后停多久再开口，0 – 1200 ms |
+
+内置五个音色（均为随包内联的真声素材，无需联网）：
+
+| 音色选项 | 说明 |
+|---|---|
+| 自动（优先神经网络女声）-US | 英文神经网络女声，默认 |
+| 智性少女音-CN | 中文少女音 |
+| 清冷优雅-日语 | 日语女声 |
+| 威严铿锵宣示-朝鲜语 | 朝鲜语男声播报 |
+| 清冷脆弱-俄语 | 俄语女声 |
 
 ### 界面音效
 
